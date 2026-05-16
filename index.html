@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lung Clinical Trial Screening Platform v2</title>
+<style>
+:root{--pri:#003366;--pri2:#0a4a8a;--acc:#e8edf2;--bg:#f5f7fa;--w:#fff;--ok:#28a745;--warn:#f0ad4e;--err:#dc3545;--g:#6c757d;--bdr:#d0d5dd;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:var(--bg);color:#333;line-height:1.5;}
+.hdr{background:linear-gradient(135deg,var(--pri),var(--pri2));color:var(--w);padding:22px 0;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.15);}
+.hdr h1{font-size:1.7rem;font-weight:600;letter-spacing:.4px;} .hdr p{font-size:.92rem;opacity:.85;margin-top:4px;}
+.ctr{max-width:980px;margin:24px auto;padding:0 18px;}
+.cd{background:var(--w);border-radius:10px;box-shadow:0 1px 6px rgba(0,0,0,.08);padding:26px 30px;margin-bottom:18px;}
+.ct{font-size:1.02rem;font-weight:700;color:var(--pri);margin-bottom:14px;padding-bottom:7px;border-bottom:2px solid var(--acc);display:flex;align-items:center;gap:8px;}
+.ct .n{background:var(--pri);color:var(--w);width:27px;height:27px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.82rem;flex-shrink:0;}
+.pg{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;} .pg4{grid-template-columns:repeat(4,1fr);}
+label.fl{font-size:.83rem;font-weight:600;color:#555;display:block;margin-bottom:3px;}
+input[type="text"],input[type="number"],input[type="date"],select,textarea{width:100%;padding:7px 11px;border:1px solid var(--bdr);border-radius:6px;font-size:.88rem;transition:border .2s;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--pri);box-shadow:0 0 0 2px rgba(0,51,102,.12);}
+.og{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:5px;}
+.og label{font-size:.88rem;cursor:pointer;display:flex;align-items:center;gap:5px;}
+.og input[type="radio"],.og input[type="checkbox"]{accent-color:var(--pri);width:15px;height:15px;cursor:pointer;}
+.sf{margin-top:9px;padding:10px 14px;background:#f9fafb;border-radius:6px;border:1px solid #eee;} .sf label.fl{font-size:.8rem;}
+.br{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:24px 0;}
+.bt{padding:11px 28px;border:none;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s;display:inline-flex;align-items:center;gap:7px;}
+.bp{background:var(--pri);color:var(--w);} .bp:hover{background:var(--pri2);transform:translateY(-1px);box-shadow:0 4px 12px rgba(0,51,102,.25);}
+.bs{background:var(--w);color:var(--pri);border:2px solid var(--pri);} .bs:hover{background:var(--acc);}
+.bg{background:var(--g);color:var(--w);} .bg:hover{background:#555;}
+.bk{background:var(--ok);color:var(--w);} .bk:hover{background:#218838;}
+.be{background:#0d6efd;color:var(--w);} .be:hover{background:#0b5ed7;}
+.bd{background:var(--err);color:var(--w);} .bd:hover{background:#c82333;}
+#results{display:none;} .rs{margin-bottom:16px;}
+.rs h3{font-size:.97rem;font-weight:700;margin-bottom:7px;display:flex;align-items:center;gap:6px;}
+.rs h3.el{color:var(--ok);} .rs h3.iv{color:var(--warn);} .rs h3.ie{color:var(--err);}
+.tr{padding:11px 14px;border-radius:8px;margin-bottom:7px;font-size:.87rem;} .tr strong{display:block;margin-bottom:2px;}
+.tr.gn{background:#e6f4ea;border-left:4px solid var(--ok);} .tr.yw{background:#fff8e1;border-left:4px solid var(--warn);} .tr.rd{background:#fdecea;border-left:4px solid var(--err);}
+.tnm{display:flex;gap:10px;margin-top:8px;} .tnm>div{flex:1;}
+.excg{display:grid;grid-template-columns:1fr auto auto;gap:7px 14px;align-items:center;font-size:.88rem;}
+.disclaimer{text-align:center;font-size:.76rem;color:#999;font-style:italic;padding:18px 0 28px;}
+/* LOG TABLE */
+.log-wrap{overflow-x:auto;margin-top:12px;}
+.log-tbl{width:100%;border-collapse:collapse;font-size:.78rem;min-width:1100px;}
+.log-tbl th{background:var(--pri);color:var(--w);padding:8px 6px;text-align:left;cursor:pointer;white-space:nowrap;position:sticky;top:0;}
+.log-tbl th:hover{background:var(--pri2);}
+.log-tbl td{padding:7px 6px;border-bottom:1px solid #e8e8e8;vertical-align:top;}
+.log-tbl tr:nth-child(even){background:#f2f6fa;}
+.log-tbl tr:hover{background:#e0e8f0;}
+.del-btn{background:var(--err);color:#fff;border:none;border-radius:4px;padding:3px 8px;cursor:pointer;font-size:.72rem;} .del-btn:hover{background:#a71d2a;}
+.badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:.72rem;margin:1px 2px;font-weight:600;}
+.badge-g{background:#d4edda;color:#155724;} .badge-y{background:#fff3cd;color:#856404;} .badge-r{background:#f8d7da;color:#721c24;}
+.count-bar{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px;}
+.count-bar span{font-size:.9rem;font-weight:600;color:var(--pri);}
+@media print{.br,.hdr{box-shadow:none;} .bt{display:none!important;} body{background:#fff;} .cd{box-shadow:none;border:1px solid #ddd;}}
+@media(max-width:640px){.pg,.pg4{grid-template-columns:1fr;} .hdr h1{font-size:1.2rem;}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+<h1>&#129729; Lung Clinical Trial Screening Platform</h1>
+<p>Based on Active Protocol Files &mdash; 6 Trials &bull; v2 with Patient Log</p>
+</div>
+
+<div class="ctr">
+
+<!-- Patient Info -->
+<div class="cd">
+<div class="ct">Patient Information</div>
+<div class="pg4">
+<div><label class="fl">MRN</label><input type="text" id="mrn" placeholder="e.g. 123456"></div>
+<div><label class="fl">First Name</label><input type="text" id="fname"></div>
+<div><label class="fl">Last Name</label><input type="text" id="lname"></div>
+<div><label class="fl">Sex</label><select id="sex"><option value="">Select…</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></div>
+</div>
+<div class="pg" style="margin-top:12px;">
+<div><label class="fl">Age</label><input type="number" id="age" min="0" max="120"></div>
+<div><label class="fl">Date of Screening</label><input type="date" id="screen-date"></div>
+<div><label class="fl">Screened By</label><input type="text" id="screened-by"></div>
+</div>
+</div>
+
+<!-- Q1 -->
+<div class="cd">
+<div class="ct"><span class="n">1</span>Cancer Type / Histology</div>
+<div class="og">
+<label><input type="radio" name="histology" value="nonsquamous"> NSCLC &ndash; Non-squamous</label>
+<label><input type="radio" name="histology" value="squamous"> NSCLC &ndash; Squamous</label>
+<label><input type="radio" name="histology" value="sclc"> SCLC</label>
+<label><input type="radio" name="histology" value="other"> Other</label>
+</div></div>
+
+<!-- Q2 -->
+<div class="cd">
+<div class="ct"><span class="n">2</span>Disease Stage (AJCC 8th Ed.)</div>
+<div class="og">
+<label><input type="radio" name="stage" value="IA2"> IA2</label>
+<label><input type="radio" name="stage" value="IB"> IB</label>
+<label><input type="radio" name="stage" value="IIA"> IIA</label>
+<label><input type="radio" name="stage" value="IIB"> IIB</label>
+<label><input type="radio" name="stage" value="IIIA"> IIIA</label>
+<label><input type="radio" name="stage" value="IIIB_N2"> IIIB (N2)</label>
+<label><input type="radio" name="stage" value="IIIB_other"> IIIB (other)</label>
+<label><input type="radio" name="stage" value="IIIC"> IIIC</label>
+<label><input type="radio" name="stage" value="IV"> IV</label>
+</div>
+<div class="tnm">
+<div><label class="fl">T</label><input type="text" id="tnm-t" placeholder="e.g. T2a"></div>
+<div><label class="fl">N</label><input type="text" id="tnm-n" placeholder="e.g. N1"></div>
+<div><label class="fl">M</label><input type="text" id="tnm-m" placeholder="e.g. M0"></div>
+</div></div>
+
+<!-- Q3 -->
+<div class="cd">
+<div class="ct"><span class="n">3</span>Disease Setting</div>
+<div class="og">
+<label><input type="radio" name="setting" value="resectable"> Surgically resectable</label>
+<label><input type="radio" name="setting" value="unresectable"> Unresectable / locally advanced</label>
+<label><input type="radio" name="setting" value="metastatic"> Metastatic</label>
+</div></div>
+
+<!-- Q4 -->
+<div class="cd">
+<div class="ct"><span class="n">4</span>ECOG Performance Status</div>
+<div class="og">
+<label><input type="radio" name="ecog" value="0"> 0</label>
+<label><input type="radio" name="ecog" value="1"> 1</label>
+<label><input type="radio" name="ecog" value="2"> 2</label>
+<label><input type="radio" name="ecog" value="3"> &ge;3</label>
+</div></div>
+
+<!-- Q5 -->
+<div class="cd">
+<div class="ct"><span class="n">5</span>PD-L1 Expression (TPS)</div>
+<div class="og">
+<label><input type="radio" name="pdl1" value=">=50"> &ge;50%</label>
+<label><input type="radio" name="pdl1" value="1-49"> 1&ndash;49%</label>
+<label><input type="radio" name="pdl1" value="<1"> &lt;1%</label>
+<label><input type="radio" name="pdl1" value="not_tested"> Not tested / pending</label>
+</div>
+<div class="sf"><label class="fl">Exact TPS if known (%)</label><input type="number" id="pdl1-exact" min="0" max="100" placeholder="e.g. 70"></div>
+</div>
+
+<!-- Q6 -->
+<div class="cd">
+<div class="ct"><span class="n">6</span>Molecular Markers (check all known)</div>
+<div class="og">
+<label><input type="checkbox" id="mk-egfr" value="EGFR"> EGFR mutation</label>
+<label><input type="checkbox" id="mk-alk" value="ALK"> ALK rearrangement</label>
+<label><input type="checkbox" id="mk-ros1" value="ROS1"> ROS1 rearrangement</label>
+<label><input type="checkbox" id="mk-kras" value="KRAS_G12C"> KRAS G12C</label>
+<label><input type="checkbox" id="mk-braf" value="BRAF"> BRAF V600E</label>
+<label><input type="checkbox" id="mk-ret" value="RET"> RET fusion</label>
+<label><input type="checkbox" id="mk-met" value="MET"> MET exon 14 / amp</label>
+<label><input type="checkbox" id="mk-her2" value="HER2"> HER2 mutation</label>
+<label><input type="checkbox" id="mk-wt" value="wild_type"> All wild-type</label>
+<label><input type="checkbox" id="mk-ngs" value="NGS_pending"> NGS pending</label>
+<label><input type="checkbox" id="mk-notested" value="not_tested"> Not tested</label>
+</div>
+<div class="sf"><label class="fl">EGFR mutation type (if applicable)</label><input type="text" id="egfr-type" placeholder="e.g. exon 19 del, L858R"></div>
+</div>
+
+<!-- Q7 -->
+<div class="cd">
+<div class="ct"><span class="n">7</span>ctDNA Status</div>
+<div class="og">
+<label><input type="radio" name="ctdna" value="detectable"> Detectable</label>
+<label><input type="radio" name="ctdna" value="undetectable"> Undetectable</label>
+<label><input type="radio" name="ctdna" value="pending"> Pending</label>
+<label><input type="radio" name="ctdna" value="not_done"> Not done</label>
+</div></div>
+
+<!-- Q8 -->
+<div class="cd">
+<div class="ct"><span class="n">8</span>Prior Systemic Therapy</div>
+<div class="og">
+<label><input type="checkbox" id="tx-naive" value="naive"> Treatment-na&iuml;ve</label>
+<label><input type="checkbox" id="tx-chemo" value="chemo"> Prior chemotherapy</label>
+<label><input type="checkbox" id="tx-io" value="io"> Prior immunotherapy / IO</label>
+<label><input type="checkbox" id="tx-targeted" value="targeted"> Prior targeted therapy</label>
+</div>
+<div class="sf"><label class="fl">Regimen details</label><input type="text" id="tx-details" placeholder="e.g. Carboplatin + pemetrexed x4, Jan 2025"></div>
+<div class="sf" style="margin-top:7px;"><label class="fl">Lines of prior therapy</label>
+<select id="tx-lines"><option value="">Select…</option><option value="0">0 (treatment-naïve)</option><option value="1">1</option><option value="2">2</option><option value="3">3+</option></select></div>
+</div>
+
+<!-- Q9 -->
+<div class="cd">
+<div class="ct"><span class="n">9</span>Prior Surgery / Radiation for NSCLC</div>
+<div class="og">
+<label><input type="checkbox" id="prior-surg"> Prior surgery</label>
+<label><input type="checkbox" id="prior-xrt"> Prior radiation</label>
+</div>
+<div class="sf"><label class="fl">Surgery details</label><input type="text" id="surg-details" placeholder="e.g. Right upper lobectomy, Mar 2024"></div>
+<div class="sf" style="margin-top:7px;"><label class="fl">Radiation details</label><input type="text" id="xrt-details" placeholder="e.g. 60 Gy / 30 fx, Jun 2024"></div>
+<div class="sf" style="margin-top:7px;">
+<label class="fl">Achieved pCR after neoadjuvant therapy?</label>
+<div class="og" style="margin-top:4px;">
+<label><input type="radio" name="pcr" value="yes"> Yes</label>
+<label><input type="radio" name="pcr" value="no"> No</label>
+<label><input type="radio" name="pcr" value="na"> N/A</label>
+</div></div></div>
+
+<!-- Q10 -->
+<div class="cd">
+<div class="ct"><span class="n">10</span>Key Exclusion Screen</div>
+<div class="excg">
+<div><strong>Active / symptomatic brain metastases?</strong></div>
+<label><input type="radio" name="excl-brain" value="yes"> Yes</label>
+<label><input type="radio" name="excl-brain" value="no"> No</label>
+<div><strong>Active autoimmune disease (systemic Tx)?</strong></div>
+<label><input type="radio" name="excl-auto" value="yes"> Yes</label>
+<label><input type="radio" name="excl-auto" value="no"> No</label>
+<div><strong>History of pneumonitis / ILD requiring steroids?</strong></div>
+<label><input type="radio" name="excl-pneum" value="yes"> Yes</label>
+<label><input type="radio" name="excl-pneum" value="no"> No</label>
+<div><strong>Significant organ dysfunction?</strong></div>
+<label><input type="radio" name="excl-organ" value="yes"> Yes</label>
+<label><input type="radio" name="excl-organ" value="no"> No</label>
+</div>
+<div class="sf" style="margin-top:9px;"><label class="fl">Organ dysfunction details</label><input type="text" id="organ-details" placeholder="e.g. CKD Stage IV, cirrhosis"></div>
+</div>
+
+<!-- Notes -->
+<div class="cd">
+<div class="ct">Additional Notes</div>
+<textarea id="notes" rows="3" placeholder="Free-text notes about this patient…"></textarea>
+</div>
+
+<!-- Buttons -->
+<div class="br">
+<button class="bt bp" onclick="checkEligibility()">&#128269; Check Trial Eligibility</button>
+<button class="bt bk" onclick="savePatient()" id="save-btn" style="display:none;">&#128190; Save Patient to Log</button>
+<button class="bt bs" onclick="clearForm()">&#128465;&#65039; Clear Form</button>
+<button class="bt bg" onclick="window.print()">&#128424;&#65039; Print</button>
+</div>
+
+<!-- Results -->
+<div id="results" class="cd">
+<div class="ct">Trial Eligibility Results</div>
+<div id="eligible" class="rs"></div>
+<div id="investigate" class="rs"></div>
+<div id="ineligible" class="rs"></div>
+</div>
+
+<!-- ═══ PATIENT LOG ═══ -->
+<div class="cd" id="log-section">
+<div class="ct">&#128203; Patient Screening Log</div>
+<div class="count-bar">
+<span id="pt-count">0 patients screened</span>
+<div>
+<button class="bt be" onclick="exportCSV()" style="padding:8px 18px;font-size:.85rem;">&#128196; Export to CSV</button>
+<button class="bt bd" onclick="clearAllData()" style="padding:8px 18px;font-size:.85rem;">&#128465; Clear All Data</button>
+</div>
+</div>
+<div class="log-wrap">
+<table class="log-tbl" id="log-tbl">
+<thead><tr>
+<th>#</th><th onclick="sortLog(1)">MRN &#8597;</th><th onclick="sortLog(2)">Last Name &#8597;</th><th onclick="sortLog(3)">First Name &#8597;</th>
+<th onclick="sortLog(4)">Sex &#8597;</th><th onclick="sortLog(5)">Pathology &#8597;</th><th onclick="sortLog(6)">Stage &#8597;</th>
+<th onclick="sortLog(7)">PD-L1 &#8597;</th><th onclick="sortLog(8)">NGS Result &#8597;</th>
+<th onclick="sortLog(9)">Eligible Trials &#8597;</th><th onclick="sortLog(10)">Pending Investigations &#8597;</th>
+<th onclick="sortLog(11)">Date &#8597;</th><th onclick="sortLog(12)">Screened By &#8597;</th><th>Action</th>
+</tr></thead>
+<tbody id="log-body"></tbody>
+</table>
+</div>
+<div id="log-empty" style="text-align:center;padding:30px;color:#aaa;font-style:italic;">No patients logged yet. Screen a patient and click "Save Patient to Log" to begin.</div>
+</div>
+
+<div class="disclaimer">
+&#9888; This is a decision-support tool only. Final eligibility determination remains with the treating oncologist and clinical trials team.<br>
+Source: Uploaded protocol files only &bull; Generated May 2026 &bull; Data stored in browser localStorage only.
+</div>
+
+</div>
+
+<script>
+// ── Helpers ──
+function gv(n){const e=document.querySelector('input[name="'+n+'"]:checked');return e?e.value:null;}
+function ic(id){return document.getElementById(id).checked;}
+let lastResults={eligible:[],investigate:[],ineligible:[]};
+
+// ── TRIAL MATCHING ──
+function checkEligibility(){
+  const hist=gv('histology'),stage=gv('stage'),setting=gv('setting'),ecog=gv('ecog'),pdl1=gv('pdl1'),pcr=gv('pcr');
+  const brM=gv('excl-brain'),autoI=gv('excl-auto'),pneu=gv('excl-pneum'),orgD=gv('excl-organ');
+  const naive=ic('tx-naive'),egfr=ic('mk-egfr'),alk=ic('mk-alk'),ros1=ic('mk-ros1'),kras=ic('mk-kras');
+  const isNSCLC=(hist==='nonsquamous'||hist==='squamous');
+  const ecogOK=(ecog==='0'||ecog==='1');
+  const hasExcl=(brM==='yes'||autoI==='yes'||pneu==='yes'||orgD==='yes');
+  const early=['IA2','IB','IIA','IIB','IIIA'],s2n2=['IIA','IIB','IIIA','IIIB_N2'];
+  let el=[],iv=[],ie=[];
+
+  // 1. BR.36
+  (function(){const nm='CCTG BR.36',ds='ctDNA-guided pembro ± chemo, 1L metastatic, PD-L1 ≥50%';
+  if(!isNSCLC)return ie.push({nm,ds,r:'Not NSCLC'});if(setting!=='metastatic')return ie.push({nm,ds,r:'Not metastatic'});
+  if(pdl1!=='>=50')return ie.push({nm,ds,r:'PD-L1 <50% or unknown'});if(egfr||alk)return ie.push({nm,ds,r:'EGFR/ALK positive'});
+  if(!naive)return ie.push({nm,ds,r:'Not treatment-naïve'});if(!ecogOK)return ie.push({nm,ds,r:'ECOG ≥2'});
+  if(hasExcl)return ie.push({nm,ds,r:'Key exclusion present'});
+  el.push({nm,ds,r:'NSCLC, metastatic, PD-L1 ≥50%, EGFR/ALK neg, treatment-naïve, ECOG 0-1'});})();
+
+  // 2. ARTEMIDE-Lung03
+  (function(){const nm='ARTEMIDE-Lung03',ds='Rilvegostomig vs pembro+chemo, 1L non-sq mNSCLC, PD-L1 ≥1%';
+  if(hist!=='nonsquamous')return ie.push({nm,ds,r:'Not non-squamous NSCLC'});if(setting!=='metastatic')return ie.push({nm,ds,r:'Not metastatic'});
+  if(pdl1==='<1')return ie.push({nm,ds,r:'PD-L1 <1%'});if(pdl1==='not_tested')return iv.push({nm,ds,r:'PD-L1 not tested – confirm ≥1%'});
+  if(egfr||alk||ros1)return ie.push({nm,ds,r:'EGFR/ALK/ROS1 positive'});if(!naive)return ie.push({nm,ds,r:'Not treatment-naïve'});
+  if(!ecogOK)return ie.push({nm,ds,r:'ECOG ≥2'});if(hasExcl)return ie.push({nm,ds,r:'Key exclusion present'});
+  el.push({nm,ds,r:'Non-sq NSCLC, metastatic, PD-L1 ≥1%, WT, treatment-naïve, ECOG 0-1'});})();
+
+  // 3. IND.242A
+  (function(){const nm='CCTG IND.242A',ds='Neoadjuvant JDQ443 (KRAS G12C), resectable IA2–IIIA';
+  if(!isNSCLC)return ie.push({nm,ds,r:'Not NSCLC'});if(setting!=='resectable')return ie.push({nm,ds,r:'Not resectable'});
+  if(!kras)return ie.push({nm,ds,r:'KRAS G12C not identified'});if(!stage||!early.includes(stage))return ie.push({nm,ds,r:'Stage not IA2–IIIA'});
+  if(!ecogOK)return ie.push({nm,ds,r:'ECOG ≥2'});if(hasExcl)return ie.push({nm,ds,r:'Key exclusion present'});
+  el.push({nm,ds,r:'NSCLC, resectable, KRAS G12C+, Stage '+stage+', ECOG 0-1'});})();
+
+  // 4. MK-2870-023
+  (function(){const nm='MK-2870-023',ds='Pembro+carbo/taxane ± sacituzumab tirumotecan, 1L sq mNSCLC';
+  if(hist!=='squamous')return ie.push({nm,ds,r:'Not squamous NSCLC'});if(setting!=='metastatic')return ie.push({nm,ds,r:'Not metastatic'});
+  if(!naive)return ie.push({nm,ds,r:'Not treatment-naïve'});if(!ecogOK)return ie.push({nm,ds,r:'ECOG ≥2'});
+  if(hasExcl)return ie.push({nm,ds,r:'Key exclusion present'});
+  el.push({nm,ds,r:'Squamous NSCLC, metastatic, treatment-naïve, ECOG 0-1'});})();
+
+  // 5. KEYNOTE-587
+  (function(){const nm='MK-3475-587 (KEYNOTE-587)',ds='Long-term extension for prior pembro study participants';
+  iv.push({nm,ds,r:'Requires verification of enrolment in a qualifying parent pembrolizumab study'});})();
+
+  // 6. V940-009
+  (function(){const nm='V940-009 / INTerpath-009',ds='Perioperative pembro + V940 mRNA vaccine, Stage II–IIIB(N2), non-pCR';
+  if(!isNSCLC)return ie.push({nm,ds,r:'Not NSCLC'});if(setting!=='resectable')return ie.push({nm,ds,r:'Not resectable'});
+  if(!stage||!s2n2.includes(stage))return ie.push({nm,ds,r:'Stage not II–IIIB(N2)'});
+  if(pcr==='yes')return ie.push({nm,ds,r:'Achieved pCR (trial requires non-pCR)'});
+  if(!ecogOK)return ie.push({nm,ds,r:'ECOG ≥2'});if(hasExcl)return ie.push({nm,ds,r:'Key exclusion present'});
+  if(pcr==='na'||pcr===null)return iv.push({nm,ds,r:'pCR status unknown – confirm non-pCR'});
+  el.push({nm,ds,r:'NSCLC, resectable, Stage '+stage.replace('_',' ')+', non-pCR, ECOG 0-1'});})();
+
+  lastResults={eligible:el,investigate:iv,ineligible:ie};
+  const rd=document.getElementById('results');rd.style.display='block';rd.scrollIntoView({behavior:'smooth'});
+  document.getElementById('save-btn').style.display='inline-flex';
+
+  function ren(arr,cls,icon,label,cid){const c=document.getElementById(cid);if(!arr.length){c.innerHTML='';return;}
+  let h='<h3 class="'+cls+'">'+icon+' '+label+' ('+arr.length+')</h3>';
+  arr.forEach(t=>{h+='<div class="tr '+(cls==='el'?'gn':cls==='iv'?'yw':'rd')+'"><strong>'+t.nm+'</strong><em>'+t.ds+'</em><br>↳ '+t.r+'</div>';});c.innerHTML=h;}
+  ren(el,'el','✅','Potentially Eligible','eligible');ren(iv,'iv','⚠️','Needs Further Investigation','investigate');ren(ie,'ie','❌','Likely Ineligible','ineligible');
+}
+
+// ── SAVE PATIENT ──
+function savePatient(){
+  const mrn=document.getElementById('mrn').value.trim();
+  if(!mrn){alert('Please enter an MRN before saving.');return;}
+  const markers=[];
+  ['mk-egfr','mk-alk','mk-ros1','mk-kras','mk-braf','mk-ret','mk-met','mk-her2','mk-wt','mk-ngs','mk-notested'].forEach(id=>{
+    if(ic(id))markers.push(document.getElementById(id).value);});
+  const pdl1=gv('pdl1');const pdl1Exact=document.getElementById('pdl1-exact').value;
+  let pdl1Str=pdl1?(pdl1==='>=50'?'≥50%':pdl1==='1-49'?'1-49%':pdl1==='<1'?'<1%':'Not tested'):'';
+  if(pdl1Exact)pdl1Str+=` (${pdl1Exact}%)`;
+  const stage=gv('stage');
+  const rec={
+    mrn:mrn,
+    lname:document.getElementById('lname').value.trim(),
+    fname:document.getElementById('fname').value.trim(),
+    sex:document.getElementById('sex').value,
+    pathology:(function(){const h=gv('histology');return h==='nonsquamous'?'NSCLC Non-squamous':h==='squamous'?'NSCLC Squamous':h==='sclc'?'SCLC':h==='other'?'Other':'';})(),
+    stage:stage?stage.replace('_',' '):'',
+    pdl1:pdl1Str,
+    ngs:markers.length?markers.join(', '):'Not recorded',
+    eligible:lastResults.eligible.map(t=>t.nm).join('; ')||'None',
+    pending:lastResults.investigate.map(t=>t.nm+': '+t.r).join('; ')||'None',
+    date:document.getElementById('screen-date').value,
+    screenedBy:document.getElementById('screened-by').value.trim(),
+    notes:document.getElementById('notes').value.trim(),
+    ts:Date.now()
+  };
+  let log=JSON.parse(localStorage.getItem('lungTrialLog')||'[]');
+  log.push(rec);localStorage.setItem('lungTrialLog',JSON.stringify(log));
+  renderLog();
+  alert('✅ Patient '+mrn+' saved to log.');
+}
+
+// ── RENDER LOG ──
+function renderLog(){
+  const log=JSON.parse(localStorage.getItem('lungTrialLog')||'[]');
+  const tb=document.getElementById('log-body');const em=document.getElementById('log-empty');
+  document.getElementById('pt-count').textContent=log.length+' patient'+(log.length!==1?'s':'')+' screened';
+  if(!log.length){tb.innerHTML='';em.style.display='block';return;}
+  em.style.display='none';
+  let h='';
+  log.forEach((r,i)=>{
+    const elBadges=r.eligible!=='None'?r.eligible.split('; ').map(t=>'<span class="badge badge-g">'+t+'</span>').join(' '):'<span class="badge badge-r">None</span>';
+    const pvBadges=r.pending!=='None'?r.pending.split('; ').map(t=>'<span class="badge badge-y">'+t+'</span>').join(' '):'—';
+    h+='<tr><td>'+(i+1)+'</td><td>'+r.mrn+'</td><td>'+r.lname+'</td><td>'+r.fname+'</td><td>'+r.sex+'</td>'
+      +'<td>'+r.pathology+'</td><td>'+r.stage+'</td><td>'+r.pdl1+'</td><td>'+r.ngs+'</td>'
+      +'<td>'+elBadges+'</td><td>'+pvBadges+'</td><td>'+r.date+'</td><td>'+r.screenedBy+'</td>'
+      +'<td><button class="del-btn" onclick="delPt('+i+')">✕</button></td></tr>';
+  });
+  tb.innerHTML=h;
+}
+
+function delPt(i){if(!confirm('Delete this patient record?'))return;
+  let log=JSON.parse(localStorage.getItem('lungTrialLog')||'[]');log.splice(i,1);
+  localStorage.setItem('lungTrialLog',JSON.stringify(log));renderLog();}
+
+// ── SORT ──
+let sortDir={};
+function sortLog(col){
+  let log=JSON.parse(localStorage.getItem('lungTrialLog')||'[]');
+  const keys=['','mrn','lname','fname','sex','pathology','stage','pdl1','ngs','eligible','pending','date','screenedBy'];
+  const k=keys[col];if(!k)return;
+  sortDir[col]=!sortDir[col];const d=sortDir[col]?1:-1;
+  log.sort((a,b)=>(a[k]||'').localeCompare(b[k]||'')*d);
+  localStorage.setItem('lungTrialLog',JSON.stringify(log));renderLog();
+}
+
+// ── EXPORT CSV ──
+function exportCSV(){
+  const log=JSON.parse(localStorage.getItem('lungTrialLog')||'[]');
+  if(!log.length){alert('No data to export.');return;}
+  const hdr=['MRN','Last Name','First Name','Sex','Pathology','Stage','PD-L1','NGS Result','Eligible Trials','Pending Investigations','Date Screened','Screened By','Notes'];
+  let csv=hdr.join(',')+'\n';
+  log.forEach(r=>{csv+=[r.mrn,r.lname,r.fname,r.sex,r.pathology,r.stage,'"'+r.pdl1+'"','"'+r.ngs+'"','"'+r.eligible+'"','"'+r.pending+'"',r.date,r.screenedBy,'"'+(r.notes||'')+'"'].join(',')+'\n';});
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='Lung_Trial_Screening_Log.csv';a.click();
+}
+
+// ── CLEAR ALL DATA ──
+function clearAllData(){if(!confirm('⚠️ This will permanently delete ALL patient screening data. Continue?'))return;
+  localStorage.removeItem('lungTrialLog');renderLog();alert('All data cleared.');}
+
+// ── CLEAR FORM ──
+function clearForm(){
+  document.querySelectorAll('input,textarea,select').forEach(el=>{
+    if(el.type==='radio'||el.type==='checkbox')el.checked=false;
+    else if(el.tagName==='SELECT')el.selectedIndex=0;else el.value='';});
+  document.getElementById('results').style.display='none';
+  document.getElementById('save-btn').style.display='none';
+  document.getElementById('screen-date').valueAsDate=new Date();
+  lastResults={eligible:[],investigate:[],ineligible:[]};
+}
+
+// ── INIT ──
+window.addEventListener('DOMContentLoaded',()=>{document.getElementById('screen-date').valueAsDate=new Date();renderLog();});
+</script>
+</body>
+</html>
